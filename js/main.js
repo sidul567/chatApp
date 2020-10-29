@@ -5,6 +5,7 @@ document.addEventListener('keydown',function(key){
         sendMessage()
     }
 })
+
 function loadChatList(){
     var db = firebase.database().ref('friend_list')
     db.on('value',function(lsts){
@@ -91,14 +92,19 @@ function loadChatMessages(chatKey,friendPhoto){
         chats.forEach(function(data){
             var chat = data.val();
             var dateTime = chat.time.split(",");
-            
+            var msg = '';
+            if(chat.message.indexOf("base64")!=-1){
+                msg = `<img src="${chat.message}" class="img-fluid" />`
+            }else{
+                msg = chat.message;
+            }
             if(chat.userId!=currentUserId){
                 messageDisplay+=`<div class="row">
                 <div class="col-2 col-sm-1 col-md-1">
                     <img src="${friendPhoto}" class="rounded-circle chat-pic" alt="">
                 </div>
                 <div class="col-6 col-sm-6 col-md-6">
-                    <p class="recieve">${chat.message}
+                    <p class="recieve">${msg}
                         <span class="time float-right" title="${dateTime[0]}">${dateTime[1]}</span>
                     </p>
                 </div>
@@ -106,7 +112,7 @@ function loadChatMessages(chatKey,friendPhoto){
             }else{
                 messageDisplay+= `<div class="row justify-content-end">
                 <div class="col-6 col-sm-6 col-md-6">
-                    <p class="sent float-right">${chat.message}
+                    <p class="sent float-right">${msg}
                         <span class="time float-right" title="${dateTime[0]}">${dateTime[1]}</span>
                     </p>
                 </div>
@@ -131,6 +137,7 @@ function hideChatList(){
     document.getElementById('side-1').classList.add('d-none','d-md-block')
     document.getElementById('side-2').classList.remove('d-none')
 }
+
 
 function sendMessage(){
     var emp = document.getElementById('txtmessage').value;
@@ -157,7 +164,6 @@ function sendMessage(){
             // document.getElementById('message').innerHTML+=message
             document.getElementById('txtmessage').value=''
             document.getElementById('txtmessage').focus()
-            // document.getElementById('message').scrollTo(0,document.getElementById('message').clientHeight)
             }
         })
     }else{
@@ -166,7 +172,38 @@ function sendMessage(){
     }
 
 }
+//Image sent//
+function chooseImage(){
+    document.getElementById('imageFile').click()
+}
+function sendImage(event){
+    var file = event.files[0]
 
+    if(!file.type.match("image.*")){
+        alert("Please choose only image");
+    }else{
+        var reader = new FileReader();
+        reader.addEventListener('load',function(){
+            var chatMessage = {
+                userId:currentUserId,
+                message:reader.result,
+                time: new Date().toLocaleString() }
+            
+                firebase.database().ref('chatMessages').child(chatKey).push(chatMessage,function(error){
+                    if(error){
+                        alert(error)
+                    }else{
+                    document.getElementById('txtmessage').value=''
+                    document.getElementById('txtmessage').focus()
+                    }
+                })
+        },false)
+        if(file){
+            reader.readAsDataURL(file);
+        }
+    }
+}
+//////
 function populateFriendList(){
     document.getElementById('lstFriend').innerHTML=`<div class="spinner-border text-center">
                                                         <span class="spinner-border  role="status" text-primary mt-5"style="width:7rem;height:7rem;"></span>
