@@ -1,6 +1,10 @@
 var currentUserId='';
 var chatKey = '';
-
+document.addEventListener('keydown',function(key){
+    if(key.which == 13){
+        sendMessage()
+    }
+})
 function loadChatList(){
     var db = firebase.database().ref('friend_list')
     db.on('value',function(lsts){
@@ -66,7 +70,6 @@ function startChat(friendKey,friendname,friendPhoto){
         document.getElementById('chatImage').src=friendPhoto
         document.getElementById('message').innerHTML = '';
 
-        onKeyDown();
         document.getElementById('txtmessage').value=''
         document.getElementById('txtmessage').focus()
 
@@ -129,13 +132,6 @@ function hideChatList(){
     document.getElementById('side-2').classList.remove('d-none')
 }
 
-function onKeyDown(){
-    document.addEventListener('keydown',function(key){
-        if(key.which == 13){
-            sendMessage()
-        }
-    })
-}
 function sendMessage(){
     var emp = document.getElementById('txtmessage').value;
     if(emp!=""){
