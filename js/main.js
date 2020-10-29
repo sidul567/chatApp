@@ -42,6 +42,46 @@ function loadChatList(){
     })
 }
 
+/////////
+////EMOJI
+loadEmojiPanel()
+function loadEmojiPanel(){
+    var emoji = '';
+    for(var i=129315;i<=129327;i++){
+        emoji+=`<a href="#" onclick="getEmoji(this)">&#${i};</a>`
+    }
+    for(var i=128512;i<=128567;i++){
+        emoji+=`<a href="#" onclick="getEmoji(this)">&#${i};</a>`
+    }
+    for(var i=128577;i<=128580;i++){
+        emoji+=`<a href="#" onclick="getEmoji(this)">&#${i};</a>`
+    }
+    emoji+=`<a href="#" onclick="getEmoji(this)">&#129488;</a>`
+    for(var i=129296;i<=129314;i++){
+        emoji+=`<a href="#" onclick="getEmoji(this)">&#${i};</a>`
+    }
+    document.getElementById('home').innerHTML=emoji
+}
+var show = false;
+function showEmojiPanl(){
+    document.getElementById('emoji').removeAttribute('style')
+    if(show==true){
+        hideEmojiPanel();
+        show = false;
+    }else{
+        show =true; 
+    } 
+}
+function hideEmojiPanel(){
+    document.getElementById('emoji').setAttribute('style','display:none;')
+    
+}
+function getEmoji(control){
+    document.getElementById('txtmessage').value+=control.innerHTML;
+}
+
+/////////
+
 function startChat(friendKey,friendname,friendPhoto){
     var friendList = {friendId:friendKey,userId:currentUserId}
     var db = firebase.database().ref('friend_list');
