@@ -118,7 +118,7 @@ function loadChatMessages(chatKey,friendPhoto){
             
         })
         document.getElementById('message').innerHTML=messageDisplay
-        document.getElementById('message').scrollTo(0,document.getElementById('message').clientHeight)
+        document.getElementById('message').scrollTo(0,document.getElementById('message').scrollHeight)
     })
 }
 
