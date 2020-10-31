@@ -1,5 +1,6 @@
 var currentUserId='';
 var chatKey = '';
+var friend_Id = '';
 document.addEventListener('keydown',function(key){
     if(key.which == 13){
         sendMessage()
@@ -84,6 +85,7 @@ function getEmoji(control){
 
 function startChat(friendKey,friendname,friendPhoto){
     var friendList = {friendId:friendKey,userId:currentUserId}
+    friend_Id = friendKey;
     var db = firebase.database().ref('friend_list');
     var flag = false;
     db.on('value',function(friends){
@@ -191,17 +193,29 @@ function sendMessage(){
             if(error){
                 alert(error)
             }else{
-            //     var message = `<div class="row justify-content-end">
-            //     <div class="col-6 col-sm-6 col-md-6">
-            //         <p class="sent float-right">${document.getElementById('txtmessage').value}
-            //             <span class="time float-right">${chatMessage.time}</span>
-            //         </p>
-            //     </div>
-            //     <div class="col-2 col-sm-1 col-md-1">
-            //         <img src="${firebase.auth().currentUser.photoURL}" class="rounded-circle chat-pic" alt="">
-            //     </div>
-            // </div>`
-            // document.getElementById('message').innerHTML+=message
+                
+            firebase.database().ref('fcmTokens').child(friend_Id).once('value',function(data){
+                $.ajax({
+                    url : 'https://fcm.googleapis.com/fcm/send',
+                    method : 'POST',
+                    headers: {
+                        'Content-Type':'application/json',
+                        'Authorization':'key='+'AAAA6FwZVzY:APA91bGvY_sY8g4yEYe1QgyKIWSBqyWSs-rDV9gUlJLWPs2FgaQ4f_fLM9lI4KI99HbBbCPDG6fdJJafsIG1TV3MrlqTvKsSbvo07lAfW_MH-9R42DQfkp_WZDCadBPfA1edEyVgTrzw'
+                    },
+                    data : JSON.stringify({
+                        'to' : data.val().token_id,
+                        'data':{'name':firebase.auth().currentUser.displayName,'message':chatMessage.message.substring(0,30)+'...','icon':firebase
+                    .auth().currentUser.photoURL}
+                    }),
+                    success : function(response){
+                        console.log(response);
+                    },
+                    error : function(xhr,status,error){
+                        console.log(xhr.error)
+                    }
+                })
+            })
+
             document.getElementById('txtmessage').value=''
             document.getElementById('txtmessage').focus()
             }
@@ -325,6 +339,19 @@ function onStateChanged(user){
             document.getElementById('lnkSignIn').style='display:none;';
             document.getElementById('lnkSignOut').style='';
             }
+
+            const messaging = firebase.messaging();
+
+
+            // Request permission and get token.....
+            messaging.requestPermission().then(function () {
+                // console.log(messaging.getToken());
+                return messaging.getToken();
+            }).then(function (token) {
+                firebase.database().ref('fcmTokens').child(currentUserId).set({ token_id: token });
+            })
+
+
             document.getElementById('lnkNewChat').style='display:block;';
             loadChatList();
         })
